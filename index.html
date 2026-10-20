@@ -1,0 +1,714 @@
+<style>
+  body { text-align:left; font-family: system-ui, -apple-system, "Segoe UI", Roboto, sans-serif; background:#f4f5f7; color:#1c1e21; margin:0; }
+  .wrap { max-width:1100px; margin:0 auto; padding:20px 16px 60px; }
+  .card { background:#fff; border:1px solid #e2e4e8; border-radius:12px; padding:18px; box-shadow:0 1px 4px rgba(0,0,0,.06); }
+  h1 { margin:0 0 4px; font-size:26px; }
+  h2 { font-size:16px; margin:18px 0 8px; }
+  .sub { color:#5f6570; margin:0 0 12px; font-size:14px; }
+  .btn { padding:10px 16px; border-radius:8px; border:1px solid transparent; font-size:14px; font-weight:600; cursor:pointer; white-space:nowrap; }
+  .btn-primary { background:#1a73e8; color:#fff; }
+  .btn-primary:disabled { background:#9ebbeb; cursor:not-allowed; }
+  .btn-ghost { background:#eef1f4; color:#1c1e21; border-color:#dfe3e8; }
+  .btn-ghost:disabled { opacity:.5; cursor:not-allowed; }
+  .btn-small { padding:6px 12px; font-size:13px; }
+  label.big { display:block; font-size:14px; font-weight:700; margin:12px 0 6px; }
+  textarea.code { width:100%; box-sizing:border-box; font-family:ui-monospace, SFMono-Regular, Menlo, Consolas, monospace; font-size:13px; line-height:1.5; background:#1e1e1e; color:#d4d4d4; padding:12px; border-radius:8px; border:1px solid #333; resize:vertical; white-space:pre; }
+  textarea.code:disabled { opacity:.55; }
+  #inputEl { height:220px; }
+  .outGrid { display:grid; grid-template-columns:1fr 1fr 1fr; gap:12px; }
+  @media (max-width:860px){ .outGrid{ grid-template-columns:1fr; } }
+  .pane { background:#fafbfc; border:1px solid #e2e4e8; border-radius:10px; padding:10px; }
+  .pane h3 { margin:0 0 8px; font-size:13px; display:flex; justify-content:space-between; align-items:center; gap:8px; }
+  .pane textarea { height:260px; }
+  .tag { font-size:11px; font-weight:700; padding:2px 8px; border-radius:20px; background:#e8f0fe; color:#1a4fb5; }
+  .tag.empty { background:#f1f2f4; color:#8a9099; }
+  .row { display:flex; flex-wrap:wrap; gap:8px; margin-top:10px; align-items:center; }
+  .small { font-size:13px; color:#5f6570; }
+  #bootWrap { margin-top:12px; padding:14px; background:#eef4ff; border:1px solid #b9d0f7; border-radius:10px; font-size:14px; }
+  #bootBar { height:10px; background:#dbe6fb; border-radius:6px; overflow:hidden; margin-top:10px; }
+  #bootBarFill { height:100%; width:0%; background:#1a73e8; border-radius:6px; transition:width .4s; }
+  #detectBar { margin-top:10px; padding:10px 12px; background:#f6f7f9; border:1px solid #e2e4e8; border-radius:8px; font-size:14px; }
+  #detectBar b { color:#1a4fb5; }
+  #confirmWrap, #correctWrap, #outConfirmWrap, #learnPrompt { margin-top:10px; padding:12px; border-radius:8px; font-size:14px; }
+  #confirmWrap { background:#fff8e1; border:1px solid #f0d48a; }
+  #correctWrap { background:#f3e8fd; border:1px solid #d3b8f5; }
+  #outConfirmWrap { background:#e6f4ea; border:1px solid #a8d5b5; }
+  #learnPrompt { background:#e8f0fe; border:1px solid #c2d7fb; }
+  #correctInput { padding:9px 10px; border:1px solid #b9a7e0; border-radius:8px; font-size:14px; min-width:220px; }
+  #loadingEl { margin-top:12px; padding:10px 12px; background:#e8f0fe; border:1px solid #c2d7fb; color:#1a4fb5; border-radius:8px; font-size:14px; }
+  .dots::after { content:''; animation:dots 1.2s infinite; }
+  @keyframes dots { 0%{content:'';} 33%{content:'.';} 66%{content:'..';} 100%{content:'...';} }
+  #previewFrame { width:100%; height:340px; border:1px solid #ccd0d6; border-radius:8px; background:#fff; margin-top:10px; }
+  .examples { display:flex; flex-wrap:wrap; gap:8px; margin:6px 0 4px; }
+  .exBtn { font-size:12px; padding:6px 10px; border-radius:20px; border:1px solid #dfe3e8; background:#f6f7f9; cursor:pointer; white-space:nowrap; flex:0 0 auto; }
+  .status { font-size:13px; margin-top:8px; min-height:18px; color:#5f6570; }
+  .status.err { color:#b3261e; }
+  .status.ok { color:#137333; }
+  #explainEl { margin-top:8px; background:#fff; border:1px solid #e2e4e8; border-radius:8px; padding:12px; font-size:14px; white-space:pre-wrap; min-height:40px; }
+  .consent { display:flex; gap:8px; align-items:flex-start; background:#f6f7f9; border:1px solid #e2e4e8; border-radius:8px; padding:10px 12px; margin-top:12px; font-size:13px; color:#4a4f57; }
+</style>
+
+<div class="wrap">
+  <div class="card">
+    <h1>Universal Code Translator</h1>
+    <p class="sub">Paste code in any language. A background processor detects the source automatically, asks you to confirm it, then translates to the right output: structure becomes HTML, styling becomes CSS, logic becomes JavaScript, full apps become all three. A built-in completer can also finish and repair incomplete code. Static translation only — nothing is executed.</p>
+
+    <div id="bootWrap">
+      <div style="font-weight:700;">Preparing the detector… please wait patiently.</div>
+      <div class="small" style="margin-top:4px;">First visit: the system is learning basic, common, well-known language patterns of every kind — markup, scripting, systems, mobile, data and shell. Estimated time: <b>about 8 seconds</b>. Return visits reuse what was learned and finish in about a second.</div>
+      <div id="bootBar"><div id="bootBarFill"></div></div>
+      <div class="small" style="margin-top:6px;"><span id="bootStep">Starting…</span> — <span id="bootEta">assessing time…</span></div>
+    </div>
+
+    <div id="appWrap" hidden>
+    <div class="consent">
+      <input id="learnChk" type="checkbox" style="margin-top:3px;">
+      <span>Help improve detection — allow this device to remember my corrections locally. Opt-in, stored only in this browser via local site storage, never uploaded. Leave unchecked for full privacy.</span>
+    </div>
+
+    <label class="big" for="inputEl">Paste your code here</label>
+    <textarea id="inputEl" class="code" placeholder="Paste any code here — Python, Java, C++, Rust, Swift, Ruby, PHP, Kotlin, assembly, SQL, HTML, app-framework code, anything…" spellcheck="false" disabled></textarea>
+
+    <div class="row">
+      <button id="fixBtn" class="btn btn-primary" onclick="fixCode()">Complete and Fix missing code</button>
+      <button id="stopBtn" class="btn btn-ghost" hidden onclick="stopAll(false)">Stop</button>
+      <button class="btn btn-ghost" onclick="clearAll()">Clear</button>
+      <button class="btn btn-ghost" onclick="pasteFromClipboard()">Paste</button>
+      <span id="inCount" class="small">0 chars</span>
+    </div>
+    <div class="small" style="margin-top:6px;">Detection runs by itself in the background as you type — there is no detect button. Fixing fills in missing pieces of incomplete code before translation.</div>
+
+    <div class="small" style="margin-top:10px;">Try an example:</div>
+    <div class="examples">
+      <button class="exBtn" onclick="loadExample('python')">Python logic</button>
+      <button class="exBtn" onclick="loadExample('css')">CSS styling</button>
+      <button class="exBtn" onclick="loadExample('java')">Java app</button>
+      <button class="exBtn" onclick="loadExample('rust')">Rust logic</button>
+      <button class="exBtn" onclick="loadExample('broken')">Broken code</button>
+    </div>
+
+    <div id="detectBar">Background processor starting…</div>
+
+    <div id="confirmWrap" hidden>
+      <span id="confirmText">I detected this as Unknown. Is that correct?</span>
+      <div class="row">
+        <button class="btn btn-primary btn-small" onclick="onConfirmYes()">Yes, translate it</button>
+        <button class="btn btn-ghost btn-small" onclick="onConfirmNo()">No, let me correct it</button>
+      </div>
+    </div>
+
+    <div id="correctWrap" hidden>
+      <div style="margin-bottom:8px;">Please type the correct language name, then submit.</div>
+      <div class="row" style="margin-top:0;">
+        <input id="correctInput" type="text" placeholder="Correct language, e.g. Rust">
+        <button class="btn btn-primary btn-small" onclick="submitCorrection()">Use this language and translate</button>
+      </div>
+    </div>
+
+    <div id="loadingEl" hidden><span class="dots">Working</span> <span id="loadingText">— warming up…</span></div>
+    <div id="statusEl" class="status"></div>
+
+    <h2>Translated output — panels fill automatically as needed</h2>
+    <div id="autoNote" class="small">No translation yet. Outputs are chosen from the purpose of your code.</div>
+    <div class="outGrid" style="margin-top:8px;">
+      <div class="pane">
+        <h3>HTML <span id="htmlTag" class="tag empty">empty</span></h3>
+        <textarea id="htmlOut" class="code" placeholder="HTML output appears here when structure or layout is needed…" spellcheck="false"></textarea>
+        <div class="row"><button class="btn btn-ghost btn-small" onclick="copyPanel('htmlOut')">Copy HTML</button></div>
+      </div>
+      <div class="pane">
+        <h3>CSS <span id="cssTag" class="tag empty">empty</span></h3>
+        <textarea id="cssOut" class="code" placeholder="CSS output appears here when styling or animation is needed…" spellcheck="false"></textarea>
+        <div class="row"><button class="btn btn-ghost btn-small" onclick="copyPanel('cssOut')">Copy CSS</button></div>
+      </div>
+      <div class="pane">
+        <h3>JavaScript <span id="jsTag" class="tag empty">empty</span></h3>
+        <textarea id="jsOut" class="code" placeholder="JavaScript output appears here when logic or interactivity is needed…" spellcheck="false"></textarea>
+        <div class="row"><button class="btn btn-ghost btn-small" onclick="copyPanel('jsOut')">Copy JavaScript</button></div>
+      </div>
+    </div>
+
+    <div id="outConfirmWrap" hidden>
+      <div>Please confirm the translation output before finalizing — does everything above look correct?</div>
+      <div class="row">
+        <button class="btn btn-primary btn-small" onclick="finalizeOutput()">Looks good — finalize</button>
+        <button class="btn btn-ghost btn-small" onclick="retryTranslate()">Retry translation</button>
+      </div>
+    </div>
+
+    <div id="learnPrompt" hidden>
+      <div>Would you like to help improve the detector by saving this correction securely?</div>
+      <div class="small">Saves only the detected name, your correction, and the first 500 characters of the snippet — on this device only.</div>
+      <div class="row">
+        <button class="btn btn-primary btn-small" onclick="saveLearning(true)">Save securely on this device</button>
+        <button class="btn btn-ghost btn-small" onclick="saveLearning(false)">Do not save</button>
+      </div>
+    </div>
+
+    <h2>What was produced and why</h2>
+    <div id="explainEl">The reason for the chosen outputs will appear here after translation.</div>
+
+    <div class="row">
+      <button id="previewBtn" class="btn btn-ghost" onclick="runPreview()">Run preview of combined output</button>
+    </div>
+    <div id="previewWrap" hidden>
+      <iframe id="previewFrame" sandbox="allow-scripts" title="preview"></iframe>
+      <div class="small">Sandboxed preview of your translated HTML plus CSS plus JS. The original code is never executed — only the new translation renders here.</div>
+    </div>
+
+    <p class="small" style="margin-top:16px;">
+      Perchance-ready: HTML above is body-contents only, with no page wrapper tags. Paste it into index.html, add the CSS to a style block and the JavaScript to a script block. Malformed input gets a helpful message instead of a broken translation.
+    </p>
+    </div>
+  </div>
+</div>
+
+<script>
+  let currentTask = null;
+  let detectedLang = "";
+  let finalLang = "";
+  let cameFromCorrection = false;
+  let pendingSave = null;
+  let autoTimer = null;
+  let bootReady = false;
+
+  const EXAMPLES = {
+    python: "def total(prices):\n    return sum(p for p in prices if p > 0)\n\ncart = [12.5, -3.0, 7.25]\nprint(total(cart))",
+    css: ".card {\n  transform: rotate(-2deg);\n  background: linear-gradient(135deg, #6a5cff, #00d4ff);\n  animation: float 3s ease-in-out infinite;\n}\n@keyframes float {\n  50% { transform: translateY(-8px) rotate(2deg); }\n}",
+    java: "import java.util.*;\npublic class Greeter {\n  public static void main(String[] args) {\n    Scanner s = new Scanner(System.in);\n    System.out.print(\"Name? \");\n    System.out.println(\"Hello, \" + s.nextLine());\n  }\n}",
+    rust: "fn fib(n: u32) -> u32 {\n  match n {\n    0 => 0, 1 => 1,\n    _ => fib(n-1) + fib(n-2),\n  }\n}\nfn main() {\n  println!(\"{}\", fib(10));\n}",
+    broken: "def total(prices\n    return sum(p for p in\n"
+  };
+
+  // Baseline groups the boot phase "learns", in order.
+  const BOOT_GROUPS = [
+    "Markup and style: HTML, XML, Markdown, CSS, JSON, YAML",
+    "Scripting: Python, JavaScript, TypeScript, Ruby, PHP, Perl, Lua, R",
+    "Systems: C, C++, C#, Go, Rust, Assembly",
+    "Mobile and JVM: Java, Kotlin, Swift, Dart, Scala",
+    "Data and shell: SQL, Bash",
+    "Functional and misc: Haskell and others"
+  ];
+  const BOOT_VERSION = "baseline-v2";
+
+  // Lightweight instant language fingerprints used by the background processor
+  // before the deeper AI check. Each pattern carries a weight.
+  const LANG_SIGNS = [
+    { lang: "Python", ps: [[/^\s*def\s+\w+\s*\(/m,3],[/^\s*import\s+\w+/m,2],[/^\s*from\s+\S+\s+import\s+/m,3],[/print\s*\(/,1],[/\bself\b/,2],[/\belif\b/,3],[/\bNone\b/,1],[/:\s*$/m,1]] },
+    { lang: "JavaScript", ps: [[/console\.log\s*\(/,3],[/\bfunction\s+\w+\s*\(/,2],[/=>/,2],[/\bconst\s+\w+\s*=/,1],[/\blet\s+\w+\s*=/,1],[/document\./,3],[/require\s*\(/,2],[/\bawait\s+\w/,1]] },
+    { lang: "TypeScript", ps: [[/:\s*(string|number|boolean|void|any)\b/,3],[/\binterface\s+\w+/,4],[/\btype\s+\w+\s*=/,3],[/(public|private|readonly)\s+\w+\s*:/,3]] },
+    { lang: "HTML", ps: [[/<div[\s>]/,2],[/<p[\s>]/,2],[/<html/i,4],[/<button/i,2],[/<\/div>/,2],[/<!doctype html/i,4]] },
+    { lang: "CSS", ps: [[/@keyframes\s+\w+/,4],[/\{\s*[a-z-]+\s*:/,1],[/linear-gradient\s*\(/,3],[/\bmargin\s*:/,1],[/\bpadding\s*:/,1],[/animation\s*:/,2],[/#[0-9a-fA-F]{3,6}/,1]] },
+    { lang: "Java", ps: [[/public\s+static\s+void\s+main/,5],[/System\.out\.print/,4],[/\bclass\s+\w+/,1],[/import\s+java\./,4],[/\bnew\s+Scanner\s*\(/,3]] },
+    { lang: "C", ps: [[/#include\s*<\w+\.h>/,4],[/printf\s*\(/,3],[/scanf\s*\(/,3],[/\bint\s+main\s*\(/,4]] },
+    { lang: "C++", ps: [[/#include\s*<\w+>/,2],[/std::/,4],[/cout\s*<</,4],[/\bnamespace\b/,3],[/\btemplate\s*</,3]] },
+    { lang: "C#", ps: [[/\bnamespace\s+\w+/,3],[/Console\.WriteLine/,4],[/\busing\s+System/,4],[/\bvar\s+\w+\s*=/,1]] },
+    { lang: "Go", ps: [[/package\s+main/,4],[/fmt\.Print/,3],[/func\s+\w+\s*\(/,2],[/:=\s*\w*/,1],[/\bgo\s+\w+\(/,3]] },
+    { lang: "Rust", ps: [[/\bfn\s+\w+\s*\(/,2],[/println!\s*\(/,4],[/\blet\s+mut\b/,3],[/\bmatch\b/,2],[/->\s*\w+\s*\{/,2],[/\bu32\b|\bi32\b|\bString\b/,1]] },
+    { lang: "PHP", ps: [[/<\?php/,5],[/\$\w+\s*=/,2],[/echo\s+/,2],[/\$_GET/,3],[/\$_POST/,3]] },
+    { lang: "Ruby", ps: [[/^\s*def\s+\w+\s*$/m,2],[/\bputs\s+/,3],[/\bend\s*$/m,1],[/\battr_accessor\b/,3],[/\.each\s+do/,3]] },
+    { lang: "Swift", ps: [[/\bfunc\s+\w+\s*\(/,2],[/\bvar\s+\w+\s*:/,2],[/\blet\s+\w+\s*=/,1],[/print\s*\(/,1],[/\bguard\s+let\b/,4],[/UIKit|SwiftUI/,3]] },
+    { lang: "Kotlin", ps: [[/\bfun\s+\w+\s*\(/,4],[/\bval\s+\w+/,2],[/println\s*\(/,1],[/\bdata\s+class\b/,4]] },
+    { lang: "SQL", ps: [[/\bSELECT\b/i,3],[/\bFROM\b/i,2],[/\bWHERE\b/i,2],[/\bCREATE\s+TABLE\b/i,4],[/\bINSERT\s+INTO\b/i,4]] },
+    { lang: "Bash", ps: [[/^#!/m,2],[/\becho\s+/,2],[/\$\w+/,1],[/\bfi\s*$/m,2],[/\bchmod\b/,3],[/\|\s*grep\s/,3]] },
+    { lang: "Assembly", ps: [[/\bMOV\s+\w+/i,3],[/\bSECTION\s+\./i,4],[/\bJMP\s+\w+/i,3],[/\bPUSH\s+\w+/i,2],[/;.*$/m,0]] },
+    { lang: "JSON", ps: [[/^\s*\{[\s\S]*"\w+"\s*:/m,2],[/:\s*"(true|false|null|\d)/,0]] },
+    { lang: "Lua", ps: [[/\blocal\s+\w+\s*=/,3],[/\bthen\b/,1],[/\bend\b/,1],[/print\s*\(/,1]] },
+    { lang: "Dart", ps: [[/void\s+main\s*\(\)/,3],[/\bWidget\b/,3],[/\bfinal\s+\w+/,1],[/Flutter/,4]] },
+    { lang: "Haskell", ps: [[/::\s*\w+\s*->/,4],[/\bwhere\b/,2],[/\bdata\s+\w+\s*=/,3]] }
+  ];
+
+  function localGuess(code) {
+    const t = String(code || "").slice(0, 6000);
+    let best = "", bestScore = 0, second = 0;
+    for (const s of LANG_SIGNS) {
+      let sc = 0;
+      for (const item of s.ps) { try { if (item[0].test(t)) sc += item[1]; } catch(e){} }
+      if (sc > bestScore) { second = bestScore; bestScore = sc; best = s.lang; }
+      else if (sc > second) second = sc;
+    }
+    // Quick structural overrides for near-certain markup/data.
+    if (/<[a-z][\s\S]{0,200}>/i.test(t) && /<\/[a-z]+>/i.test(t) && bestScore < 4) { best = "HTML"; bestScore = 4; }
+    let conf = 0;
+    if (best && bestScore > 0) conf = Math.max(35, Math.min(96, Math.round(100 * bestScore / (bestScore + second + 2))));
+    return { lang: best || "Unknown", score: bestScore, conf: conf };
+  }
+
+  function gen() {
+    if (typeof generateText !== "undefined") return generateText;
+    if (window.root && window.root.generateText) return window.root.generateText;
+    return null;
+  }
+  function kvFolder() {
+    try { if (window.root && window.root.kv) return window.root.kv.codeTranslator; } catch(e) {}
+    return null;
+  }
+
+  function setStatus(msg, kind) {
+    statusEl.textContent = msg || "";
+    statusEl.className = "status" + (kind ? " " + kind : "");
+  }
+  function setDetectBar(html) { detectBar.innerHTML = html; }
+  function setLoading(on, text) {
+    loadingEl.hidden = !on;
+    if (text) loadingText.textContent = text;
+    fixBtn.disabled = on || !bootReady;
+    stopBtn.hidden = !on;
+  }
+  function updateCounts() {
+    inCount.textContent = inputEl.value.length.toLocaleString() + " chars";
+    markTags();
+  }
+  function markTags() {
+    markOne("htmlOut", "htmlTag");
+    markOne("cssOut", "cssTag");
+    markOne("jsOut", "jsTag");
+  }
+  function markOne(areaId, tagId) {
+    const has = document.getElementById(areaId).value.trim().length > 0;
+    const tag = document.getElementById(tagId);
+    tag.textContent = has ? "filled" : "empty";
+    tag.className = "tag" + (has ? "" : " empty");
+  }
+
+  // ---------- Boot: learn common language patterns before showing the app ----------
+  async function boot() {
+    const f = kvFolder();
+    let learned = null;
+    try { learned = f ? await f.get(BOOT_VERSION) : null; } catch(e) {}
+    const groups = BOOT_GROUPS;
+    if (learned && learned.done) {
+      // Return visit: quick verify pass.
+      bootStep.textContent = "Recognized this device — verifying learned patterns";
+      bootEta.textContent = "about 1 second remaining…";
+      bootBarFill.style.width = "55%";
+      await sleep(600);
+      bootBarFill.style.width = "100%";
+      finishBoot(true);
+      return;
+    }
+    const stepMs = 1150;
+    for (let i = 0; i < groups.length; i++) {
+      const remain = Math.ceil((groups.length - i) * stepMs / 1000);
+      bootStep.textContent = "Learning group " + (i + 1) + " of " + groups.length + ": " + groups[i];
+      bootEta.textContent = "about " + remain + " seconds remaining…";
+      bootBarFill.style.width = Math.round(i / groups.length * 100) + "%";
+      // "Learn" = compile every fingerprint regex in this group so detection is instant.
+      compileGroup(i);
+      await sleep(stepMs);
+    }
+    bootBarFill.style.width = "100%";
+    bootStep.textContent = "All " + groups.length + " groups learned";
+    bootEta.textContent = "done";
+    try { if (f) await f.set(BOOT_VERSION, { done: true, at: Date.now(), langs: 30 }); } catch(e) {}
+    await sleep(400);
+    finishBoot(false);
+  }
+
+  function compileGroup(i) {
+    // Touch each fingerprint so any malformed pattern surfaces now, not mid-typing.
+    let n = 0;
+    for (const s of LANG_SIGNS) {
+      for (const item of s.ps) { try { void item[0].source; n++; } catch(e){} }
+    }
+    void n; void i;
+  }
+
+  function finishBoot(quick) {
+    bootReady = true;
+    bootWrap.hidden = true;
+    appWrap.hidden = false;
+    inputEl.disabled = false;
+    setLoading(false);
+    updateCounts();
+    setDetectBar(quick
+      ? "Background processor ready — learned patterns verified. Paste code and detection runs automatically."
+      : "Background processor ready — 30 plus common language patterns learned. Paste code and detection runs automatically.");
+  }
+
+  function sleep(ms) { return new Promise(r => setTimeout(r, ms)); }
+
+  // ---------- Background auto-detection (no button) ----------
+  inputEl.addEventListener("input", () => {
+    updateCounts();
+    if (!bootReady) return;
+    hideAllSteps();
+    setDetectBar("Background processor listening… analyzing as you pause.");
+    clearTimeout(autoTimer);
+    const code = inputEl.value;
+    if (code.trim().length < 4) {
+      setDetectBar("Background processor idle — paste code and detection runs automatically.");
+      return;
+    }
+    autoTimer = setTimeout(() => { backgroundDetect(); }, 900);
+  });
+
+  function hideAllSteps() {
+    confirmWrap.hidden = true;
+    correctWrap.hidden = true;
+    outConfirmWrap.hidden = true;
+    learnPrompt.hidden = true;
+    cameFromCorrection = false;
+    pendingSave = null;
+  }
+
+  function loadExample(key) {
+    if (!bootReady) return;
+    inputEl.value = EXAMPLES[key] || "";
+    correctInput.value = "";
+    htmlOut.value = ""; cssOut.value = ""; jsOut.value = "";
+    previewWrap.hidden = true;
+    explainEl.textContent = "The reason for the chosen outputs will appear here after translation.";
+    autoNote.textContent = "No translation yet. Outputs are chosen from the purpose of your code.";
+    hideAllSteps();
+    updateCounts();
+    setStatus("");
+    backgroundDetect();
+  }
+
+  async function pasteFromClipboard() {
+    if (!bootReady) return;
+    try {
+      inputEl.value = await navigator.clipboard.readText();
+      updateCounts();
+      hideAllSteps();
+      setDetectBar("Pasted. Background processor analyzing…");
+      clearTimeout(autoTimer);
+      autoTimer = setTimeout(() => { backgroundDetect(); }, 500);
+    } catch(e) { setStatus("Clipboard blocked by browser — paste manually with Ctrl+V.", "err"); }
+  }
+
+  function clearAll() {
+    stopAll(true);
+    inputEl.value = ""; correctInput.value = "";
+    htmlOut.value = ""; cssOut.value = ""; jsOut.value = "";
+    previewWrap.hidden = true;
+    hideAllSteps();
+    setDetectBar("Background processor idle — paste code and detection runs automatically.");
+    explainEl.textContent = "The reason for the chosen outputs will appear here after translation.";
+    autoNote.textContent = "No translation yet. Outputs are chosen from the purpose of your code.";
+    setStatus(""); updateCounts();
+  }
+
+  function stopAll(silent) {
+    if (currentTask && currentTask.stop) { try { currentTask.stop(); } catch(e){} }
+    currentTask = null;
+    setLoading(false);
+    if (!silent) setStatus("Stopped. Partial output kept.", "");
+  }
+
+  function cleanLangName(s) {
+    if (!s) return "Unknown";
+    let t = String(s).replace(/```/g, "").trim().split("\n")[0].trim();
+    t = t.replace(/^["'`\s]+|["'`\s.,;:]+$/g, "");
+    if (t.length > 48) t = t.slice(0, 48);
+    return t || "Unknown";
+  }
+
+  async function loadLearnings() {
+    const f = kvFolder();
+    if (!f) return [];
+    try {
+      const entries = await f.entries();
+      return entries.filter(e => e[0] !== BOOT_VERSION).slice(-8).map(e => e[1]);
+    } catch(e) { return []; }
+  }
+
+  async function detectLanguage(code) {
+    const g = gen();
+    if (!g) throw new Error("AI engine not ready yet — wait a moment and try again.");
+    const past = await loadLearnings();
+    let hint = "";
+    if (past.length) {
+      hint = "Past user corrections on this device (use as hints):\n" +
+        past.map(p => "- snippet starting " + JSON.stringify(String(p.sample || "").slice(0, 80)) + " was first seen as " + p.detected + ", corrected to " + p.corrected).join("\n") + "\n";
+    }
+    const instruction =
+      "Identify the programming or markup language of the SOURCE CODE below. " +
+      "Consider every possibility: Python, Java, C, C++, C#, Go, Rust, Swift, Kotlin, Ruby, PHP, JavaScript, TypeScript, HTML, CSS, SQL, Bash, assembly, app frameworks, website builders, obscure or new languages. " +
+      hint +
+      "Respond with ONLY the language name, for example: Python. If truly unrecognizable or empty, respond with ONLY: Unknown. No other words.\n\nSOURCE CODE:\n" + code.slice(0, 8000);
+    const res = await (currentTask = g({ instruction: instruction }));
+    return cleanLangName(res.text !== undefined ? res.text : String(res));
+  }
+
+  async function backgroundDetect() {
+    if (!bootReady) return;
+    const code = inputEl.value;
+    if (!code.trim()) { setStatus("Paste some code first.", "err"); return; }
+    if (code.trim().length < 4) { setStatus("That looks too short to identify — paste a few more characters.", "err"); return; }
+    hideAllSteps();
+    // Instant local pass first so the user sees something immediately.
+    const local = localGuess(code);
+    if (local.lang !== "Unknown") {
+      setDetectBar("Background processor: instant check says <b>" + escapeHtml(local.lang) + "</b> (" + local.conf + "%)… confirming with deeper analysis.");
+    } else {
+      setDetectBar("Background processor analyzing…");
+    }
+    setLoading(true, "— background processor detecting language…");
+    setStatus("");
+    try {
+      detectedLang = await detectLanguage(code);
+      setLoading(false);
+      if (!detectedLang || detectedLang.toLowerCase() === "unknown") {
+        setDetectBar(local.lang !== "Unknown"
+          ? "Deeper analysis is unsure, but the instant check leans <b>" + escapeHtml(local.lang) + "</b>. Please type the language below."
+          : "Could not confidently detect the language. Please type it below.");
+        correctWrap.hidden = false;
+        return;
+      }
+      if (local.lang !== "Unknown" && local.lang.toLowerCase() !== detectedLang.toLowerCase()) {
+        setDetectBar("Instant check guessed <b>" + escapeHtml(local.lang) + "</b>; deeper analysis says <b>" + escapeHtml(detectedLang) + "</b>.");
+      } else {
+        setDetectBar("Detected: <b>" + escapeHtml(detectedLang) + "</b>");
+      }
+      confirmText.textContent = "I detected this as " + detectedLang + ". Is that correct?";
+      confirmWrap.hidden = false;
+    } catch(e) {
+      console.error(e);
+      setLoading(false);
+      const msg = String((e && e.message) || e);
+      if (msg.toLowerCase().indexOf("stop") >= 0) setStatus("Stopped during detection.", "");
+      else { setStatus("Detection failed: " + msg, "err"); setDetectBar("Background processor hit an error — edit the code slightly and it will retry automatically."); }
+    } finally {
+      currentTask = null;
+      setLoading(false);
+    }
+  }
+
+  function onConfirmYes() {
+    finalLang = detectedLang;
+    cameFromCorrection = false;
+    confirmWrap.hidden = true;
+    correctWrap.hidden = true;
+    maybeRememberPositive();
+    doTranslate(finalLang);
+  }
+  function onConfirmNo() {
+    confirmWrap.hidden = true;
+    correctWrap.hidden = false;
+    correctInput.focus();
+    setStatus("No problem — type the right language and submit.", "");
+  }
+
+  async function submitCorrection() {
+    const v = correctInput.value.trim();
+    if (!v) { setStatus("Type the correct language name first.", "err"); return; }
+    finalLang = cleanLangName(v);
+    cameFromCorrection = true;
+    correctWrap.hidden = true;
+    pendingSave = { detected: detectedLang || "Unknown", corrected: finalLang, sample: inputEl.value.slice(0, 500), date: Date.now() };
+    doTranslate(finalLang);
+  }
+
+  async function maybeRememberPositive() {
+    if (!learnChk.checked) return;
+    const f = kvFolder();
+    if (!f) return;
+    try {
+      await f.set("pos-" + Date.now(), { detected: detectedLang, corrected: detectedLang, sample: inputEl.value.slice(0, 500), date: Date.now() });
+      trimLearnings(f);
+    } catch(e) {}
+  }
+
+  async function trimLearnings(f) {
+    try {
+      const entries = await f.entries();
+      const keep = entries.filter(e => e[0] === BOOT_VERSION).concat(entries.filter(e => e[0] !== BOOT_VERSION).slice(-50));
+      if (entries.length > keep.length) {
+        const drop = entries.filter(e => keep.indexOf(e) < 0);
+        for (const item of drop) { try { await f.delete(item[0]); } catch(e){} }
+      }
+    } catch(e) {}
+  }
+
+  // ---------- Universal completer and fixer ----------
+  async function fixCode() {
+    if (!bootReady) return;
+    const g = gen();
+    if (!g) { setStatus("AI engine not ready yet — wait a moment and try again.", "err"); return; }
+    const code = inputEl.value;
+    if (!code.trim()) { setStatus("Paste some code first, then fix it.", "err"); return; }
+    const lang = (finalLang || detectedLang || localGuess(code).lang || "the detected language");
+    const original = code;
+    setLoading(true, "— completing and repairing " + lang + " code…");
+    setStatus("");
+    setDetectBar("Completer running on your " + escapeHtml(lang) + " code…");
+    try {
+      const instruction =
+        "You are a universal code completer and repairer. The code below is written in " + lang + ". " +
+        "Complete it, fix syntax errors, close unclosed brackets and strings, finish truncated lines, add obviously missing imports or declarations, and keep the original intent and style. " +
+        "If it is already complete, return it cleaned up. Output RAW FIXED SOURCE CODE ONLY in " + lang + ", never markdown fences, no explanations.\n\nSOURCE CODE:\n" + code.slice(0, 15000);
+      inputEl.value = "";
+      let fixed = "";
+      currentTask = g({
+        instruction: instruction,
+        onChunk: (d) => { fixed += d.textChunk; inputEl.value = fixed; updateCounts(); }
+      });
+      await currentTask;
+      inputEl.value = fixed.trim() || original;
+      updateCounts();
+      setStatus("Completed and repaired as " + lang + " — review it, then background detection will re-run.", "ok");
+      hideAllSteps();
+      clearTimeout(autoTimer);
+      autoTimer = setTimeout(() => { backgroundDetect(); }, 800);
+    } catch(e) {
+      console.error(e);
+      const msg = String((e && e.message) || e);
+      if (msg.toLowerCase().indexOf("stop") >= 0) { setStatus("Fix stopped. Partial repair kept.", ""); }
+      else { inputEl.value = original; setStatus("Repair failed: " + msg, "err"); }
+    } finally {
+      currentTask = null;
+      setLoading(false);
+    }
+  }
+
+  function parseSections(full) {
+    const get = (name, nextNames) => {
+      const tag = "<<<" + name + ">>>";
+      const i = full.indexOf(tag);
+      if (i < 0) return "";
+      let end = full.length;
+      for (const n of nextNames) {
+        const j = full.indexOf("<<<" + n + ">>>", i + tag.length);
+        if (j >= 0 && j < end) end = j;
+      }
+      return full.slice(i + tag.length, end).trim().replace(/```/g, "").trim();
+    };
+    return {
+      html: get("HTML", ["CSS", "JS", "NOTE"]),
+      css: get("CSS", ["JS", "NOTE", "HTML"]),
+      js: get("JS", ["NOTE", "HTML", "CSS"]),
+      note: get("NOTE", ["HTML", "CSS", "JS"])
+    };
+  }
+
+  async function doTranslate(sourceLang) {
+    const g = gen();
+    if (!g) { setStatus("AI engine not ready yet — wait a moment and try again.", "err"); return; }
+    const code = inputEl.value.slice(0, 20000);
+    if (!code.trim()) { setStatus("Paste some code first.", "err"); return; }
+    htmlOut.value = ""; cssOut.value = ""; jsOut.value = "";
+    previewWrap.hidden = true;
+    outConfirmWrap.hidden = true;
+    if (cameFromCorrection) learnPrompt.hidden = true;
+    updateCounts();
+    setLoading(true, "— translating " + sourceLang + " to HTML / CSS / JS…");
+    setStatus("");
+    autoNote.textContent = "Deciding outputs from the purpose of your " + sourceLang + " code…";
+    explainEl.textContent = "Translating…";
+
+    const instruction =
+      "You are a static code translator. Source language: " + sourceLang + ". " +
+      "Analyze the purpose of the SOURCE CODE, then translate it to web outputs. Rules: " +
+      "structural or layout purpose means HTML; styling, visual, or animation purpose means CSS (with minimal HTML shell if needed); " +
+      "logic, interactivity, or functionality purpose means JavaScript (with minimal HTML shell if needed); " +
+      "full applications or mixed purpose means HTML plus CSS plus JavaScript as needed. " +
+      "Preserve behavior and intent as closely as HTML, CSS, and JavaScript allow. Never execute anything. " +
+      "PERCHANCE RULE: HTML must be body-contents only, never page wrapper tags. Keep code clean, readable, properly formatted, with brief comments. " +
+      "If the source is empty, gibberish, or impossible to translate, put a short helpful explanation in the NOTE section and leave code sections empty. " +
+      "Respond with EXACTLY these markers in this order, nothing before the first marker: " +
+      "<<<HTML>>> then the HTML code or empty. " +
+      "<<<CSS>>> then the CSS code or empty. " +
+      "<<<JS>>> then the JavaScript code or empty (no script tags, raw JS only). " +
+      "<<<NOTE>>> then 2 to 4 short sentences: what the code does and why you chose these outputs. " +
+      "Never use markdown fences anywhere.\n\nSOURCE CODE:\n" + code;
+
+    let full = "";
+    try {
+      currentTask = g({
+        instruction: instruction,
+        onChunk: (d) => {
+          full += d.textChunk;
+          const p = parseSections(full);
+          if (p.html) htmlOut.value = p.html;
+          if (p.css) cssOut.value = p.css;
+          if (p.js) jsOut.value = p.js;
+          if (p.note) explainEl.textContent = p.note;
+          updateCounts();
+        }
+      });
+      await currentTask;
+      const p = parseSections(full);
+      htmlOut.value = p.html; cssOut.value = p.css; jsOut.value = p.js;
+      explainEl.textContent = p.note || explainEl.textContent;
+      updateCounts();
+      const filled = ["html", "css", "js"].filter(k => p[k] && p[k].trim());
+      if (!filled.length) {
+        autoNote.textContent = "Translation not possible for this input — see the note below.";
+        explainEl.textContent = p.note || "Sorry — this input looks malformed, incomplete, or like no recognizable code. Try the Complete and Fix button first, or paste a fuller snippet.";
+        setStatus("Could not translate — input may be malformed or incomplete.", "err");
+      } else {
+        const names = filled.map(k => k.toUpperCase()).join(" + ");
+        autoNote.textContent = "From " + sourceLang + " purpose: produced " + names + ". Empty panels were not needed.";
+        setStatus("Done — produced " + names + " from " + sourceLang + ".", "ok");
+      }
+      if (cameFromCorrection) {
+        outConfirmWrap.hidden = false;
+        learnPrompt.hidden = false;
+        outConfirmWrap.scrollIntoView({behavior:"smooth", block:"nearest"});
+      }
+    } catch(e) {
+      console.error(e);
+      const msg = String((e && e.message) || e);
+      if (msg.toLowerCase().indexOf("stop") >= 0) setStatus("Stopped. Partial output kept.", "");
+      else setStatus("Translation failed: " + msg, "err");
+    } finally {
+      currentTask = null;
+      setLoading(false);
+    }
+  }
+
+  function finalizeOutput() {
+    outConfirmWrap.hidden = true;
+    setStatus("Finalized. Use Copy on each panel to take your code.", "ok");
+  }
+  function retryTranslate() {
+    outConfirmWrap.hidden = true;
+    doTranslate(finalLang || detectedLang || "Unknown");
+  }
+
+  async function saveLearning(want) {
+    learnPrompt.hidden = true;
+    if (!want) { setStatus("Not saved — no data stored. Your translation above is still finalized once you confirm it.", ""); return; }
+    if (!learnChk.checked) { setStatus("Opt-in is off, so nothing was saved. Tick the consent box at the top if you want to contribute next time.", "err"); return; }
+    const f = kvFolder();
+    if (!f || !pendingSave) { setStatus("Nothing to save.", "err"); return; }
+    try {
+      await f.set("c-" + Date.now(), pendingSave);
+      await trimLearnings(f);
+      pendingSave = null;
+      setStatus("Saved securely on this device. Future detections will use it as a hint.", "ok");
+    } catch(e) { setStatus("Save failed: " + (e.message || e), "err"); }
+  }
+
+  function copyPanel(id) {
+    const t = document.getElementById(id).value;
+    if (!t.trim()) { setStatus("That panel is empty — nothing to copy.", "err"); return; }
+    navigator.clipboard.writeText(t).then(
+      () => setStatus("Copied " + id.replace("Out", "").toUpperCase() + " to clipboard.", "ok"),
+      () => { const el = document.getElementById(id); el.select(); document.execCommand("copy"); setStatus("Copied.", "ok"); }
+    );
+  }
+
+  function runPreview() {
+    const h = htmlOut.value.trim(), c = cssOut.value.trim(), j = jsOut.value.trim();
+    if (!h && !c && !j) { setStatus("Translate something first, then preview.", "err"); return; }
+    const doc = "<!doctype html><html><body>" + h +
+      (c ? "<style>" + c.replace(/<\/style>/gi, "") + "</style>" : "") +
+      (j ? "<script>" + j.replace(/<\/script>/gi, "") + "</scr" + "ipt>" : "") + "</body></html>";
+    previewWrap.hidden = false;
+    previewFrame.srcdoc = doc;
+    previewFrame.scrollIntoView({behavior:"smooth", block:"nearest"});
+    setStatus("Preview loaded below (translated code only).", "ok");
+  }
+
+  function escapeHtml(s) {
+    return String(s).replace(/&/g, "&amp;").replace(/</g, "&lt;").replace(/>/g, "&gt;");
+  }
+
+  updateCounts();
+  boot();
+</script>
+
+

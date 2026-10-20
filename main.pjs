@@ -1,0 +1,9 @@
+generateText = {import:ai-text-plugin}
+kv = {import:kv-plugin}
+
+$meta
+  title = Universal Code Translator — Any Language to HTML / CSS / JS
+  description = Paste code in any language. Auto-detection confirms the source language, then translates to the right HTML, CSS, and/or JavaScript outputs automatically.
+  tags = code, translator, html, css, javascript, converter, developer tools, auto-detect
+
+
